@@ -18,6 +18,11 @@ class PuzzleState:
                 self.blank_row = i//self.n
                 self.blank_col = i%self.n
                 break
+    def __lt__(self, other):
+    selfPriority = (self.cost, self.config)
+    otherPriority = (other.cost, other.config)
+    return selfPriority < otherPriority
+
     
     def display(self):
         for i in range(self.n):
