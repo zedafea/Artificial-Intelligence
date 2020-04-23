@@ -180,21 +180,56 @@ def dfs_search(initial_state):
 def A_star_search(initial_state):
     tm = time.time()
     explored = []
-    
+    l = []
     frontier = Q.PriorityQueue()
-    frontier.put(initial_state)
+    frontier.put((initial_state.cost,initial_state))
     while not frontier.empty():
-        state = frontier.get() 
+        state = frontier.get()
+        state = state[1]
         explored.append(state)
-        
+        if state.config not in l:
+            l.append(state.config)
+    
         if test_goal(state):
-            return writeOutput(tm,state)
+            max_search_depth = state.n
+            state_cost = state.cost
+            return writeOutput(tm,state,state_cost,max_search_depth,l)
         else:
-            for i in state.expand():
-                if i not in explored and i not in frontier.queue:
-                    frontier.put(i)
+            for child in state.expand():
+                
+                if child not in explored and child not in frontier.queue:
+                    
+                    total_cost = child.cost + calculate_mahn_dist(child)
+                    frontier.put((total_cost,child))
+                elif child in frontier.queue:
+                    frontier.get(child)
+                    
+                    new_cost = child.cost + calculate_mahn_dist(child)
+                    frontier.put((new_cost,child))
+                    
     return writeOutput(tm)
 
+def calculate_mahn_dist(state):
+    
+    mahn_dist = []
+    n = state.dimension
+    for i,value in enumerate(state.config):
+        v_row = value//n
+        v_col = value%n
+        goal_row = i//n
+        goal_col = i%n
+        if v_row == goal_row:
+            if v_col == goal_col:
+                mahn_dist.append(0)
+            else:
+                mahn_dist.append(abs(v_col-goal_col))
+        else:
+            if v_col == goal_col:
+                mahn_dist.append(abs(v_row-goal_row))
+            else:
+                mahn_dist.append(abs(v_row-goal_row)+abs(v_col-goal_col))
+        mahn_dist = sum(mahn_dist)
+        return mahn_dist
         
 def calculate_total_cost(state):
 
